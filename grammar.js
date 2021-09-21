@@ -68,12 +68,15 @@ module.exports = grammar({
   word: $ => $.identifier,
 
   rules: {
-    module: $ => repeat($._statement),
+    program: $ => optional_with_placeholder('statement_list', repeat($.statement)),
 
-    _statement: $ => choice(
+    statement: $ => choice(
       $._simple_statements,
       $._compound_statement
     ),
+
+    // Modifiers
+    async_modifier: $ => field('modifier', 'async'),
 
     // Simple statements
 
@@ -223,8 +226,8 @@ module.exports = grammar({
     // Compound statements
 
     _compound_statement: $ => choice(
-      $.if_statement,
-      $.for_statement,
+      $.if,
+      $.for,
       $.while_statement,
       $.try_statement,
       $.with_statement,
@@ -233,16 +236,29 @@ module.exports = grammar({
       $.decorated_definition
     ),
 
+    // if: $ => seq(
+    //   $.if_clause,
+    //   optional_with_placeholder('else_if_clause_list', repeat($.else_if_clause)),
+    //   optional_with_placeholder('else_clause_optional', $.else_clause)
+    // ),
+    if: $ => seq(
+      $.if_statement, 
+      optional_with_placeholder('else_if_clause_list', 
+        repeat($.else_if_clause)), 
+      optional_with_placeholder('else_clause_optional', 
+      $.else_clause)
+    ),
+
     if_statement: $ => seq(
       'if',
       field('condition', $.expression),
       ':',
       field('consequence', $._suite),
-      repeat(field('alternative', $.elif_clause)),
-      optional(field('alternative', $.else_clause))
+      // repeat(field('alternative', $.else_if_clause)),
+      // optional(field('alternative', $.else_clause))
     ),
 
-    elif_clause: $ => seq(
+    else_if_clause: $ => seq(
       'elif',
       field('condition', $.expression),
       ':',
@@ -255,15 +271,18 @@ module.exports = grammar({
       field('body', $._suite)
     ),
 
-    for_statement: $ => seq(
-      optional('async'),
+    for: $ => $.for_each_clause,
+
+    for_each_clause: $ => seq(
+      optional_with_placeholder('modifier_list', $.async_modifier),
       'for',
-      field('left', $._left_hand_side),
+      field('block_iterator', $._left_hand_side),
       'in',
-      field('right', $._expressions),
+      field('block_collection', $._expressions),
       ':',
       field('body', $._suite),
-      field('alternative', optional($.else_clause))
+      optional_with_placeholder('else_clause_optional', 
+      $.else_clause)
     ),
 
     while_statement: $ => seq(
@@ -271,7 +290,8 @@ module.exports = grammar({
       field('condition', $.expression),
       ':',
       field('body', $._suite),
-      optional(field('alternative', $.else_clause))
+      optional_with_placeholder('else_clause_optional', 
+      $.else_clause)
     ),
 
     try_statement: $ => seq(
@@ -281,7 +301,8 @@ module.exports = grammar({
       choice(
         seq(
           repeat1($.except_clause),
-          optional($.else_clause),
+          optional_with_placeholder('else_clause_optional', 
+            $.else_clause),
           optional($.finally_clause)
         ),
         $.finally_clause
@@ -308,7 +329,7 @@ module.exports = grammar({
     ),
 
     with_statement: $ => seq(
-      optional('async'),
+      optional_with_placeholder('modifier_list', $.async_modifier),
       'with',
       $.with_clause,
       ':',
@@ -329,11 +350,11 @@ module.exports = grammar({
     )),
 
     function_definition: $ => seq(
-      optional('async'),
+      optional_with_placeholder('modifier_list', $.async_modifier),
       'def',
       field('name', $.identifier),
       field('parameters', $.parameters),
-      optional(
+      optional_with_placeholder('return_type_optional', 
         seq(
           '->',
           field('return_type', $.type)
@@ -345,7 +366,7 @@ module.exports = grammar({
 
     parameters: $ => seq(
       '(',
-      optional($._parameters),
+      optional_with_placeholder('parameter_list', $._parameters),
       ')'
     ),
 
@@ -428,14 +449,14 @@ module.exports = grammar({
       $._newline
     ),
 
-    _suite: $ => choice(
-      alias($._simple_statements, $.block),
-      seq($._indent, $.block),
-      alias($._newline, $.block)
-    ),
+    _suite: $ => field('indentation_offset_body', choice(
+      $._simple_statements,
+      seq($._indent, $.indentation_offset_body),
+      $._newline
+    )),
 
-    block: $ => seq(
-      repeat($._statement),
+    indentation_offset_body: $ => seq(
+      optional_with_placeholder('statement_list', repeat($.statement)),
       $._dedent
     ),
 
@@ -453,7 +474,7 @@ module.exports = grammar({
       )
     )),
 
-    dotted_name: $ => sep1($.identifier, '.'),
+    dotted_name: $ => field('identifier', sep1($.identifier, '.')),
 
     // Patterns
 
@@ -500,18 +521,19 @@ module.exports = grammar({
       ']'
     ),
 
+    parameter_value: $ => $.expression, 
+
     default_parameter: $ => seq(
       field('name', $.identifier),
-      '=',
-      field('value', $.expression)
+      field('parameter_value_optional', seq('=', $.parameter_value))
     ),
 
     typed_default_parameter: $ => prec(PREC.typed_parameter, seq(
       field('name', $.identifier),
-      ':',
-      field('type', $.type),
-      '=',
-      field('value', $.expression)
+      field('type_optional', seq(
+        ':',
+        $.type)),
+      field('parameter_value_optional', seq('=', $.parameter_value))
     )),
 
     list_splat_pattern: $ => seq(
@@ -652,21 +674,21 @@ module.exports = grammar({
     ),
 
     assignment: $ => seq(
-      field('left', $._left_hand_side),
-      choice(
-        seq('=', field('right', $._right_hand_side)),
-        seq(':', field('type', $.type)),
-        seq(':', field('type', $.type), '=', field('right', $._right_hand_side))
-      )
+      field('assignment_variable', $._left_hand_side),
+      optional_with_placeholder('type_optional', 
+        seq(':', $.type)
+      ),
+      '=', 
+      field('assignment_value', $._right_hand_side)
     ),
 
     augmented_assignment: $ => seq(
-      field('left', $._left_hand_side),
+      field('assignment_variable', $._left_hand_side),
       field('operator', choice(
         '+=', '-=', '*=', '/=', '@=', '//=', '%=', '**=',
         '>>=', '<<=', '&=', '^=', '|='
       )),
-      field('right', $._right_hand_side)
+      field('assignment_value', $._right_hand_side)
     ),
 
     _left_hand_side: $ => choice(
@@ -739,13 +761,16 @@ module.exports = grammar({
     )),
 
     typed_parameter: $ => prec(PREC.typed_parameter, seq(
-      choice(
+      field('identifier', choice(
         $.identifier,
         $.list_splat_pattern,
         $.dictionary_splat_pattern
-      ),
-      ':',
-      field('type', $.type)
+      )),
+      field('type_optional', seq(
+        ':',
+        $.type
+      )), 
+      optional_with_placeholder('parameter_value_optional', '!!UNMATCHED_OPTIONAL')
     )),
 
     type: $ => $.expression,
@@ -839,7 +864,7 @@ module.exports = grammar({
     ),
 
     for_in_clause: $ => prec.left(seq(
-      optional('async'),
+      optional_with_placeholder('modifier_list', $.async_modifier),
       'for',
       field('left', $._left_hand_side),
       'in',
@@ -977,4 +1002,8 @@ function commaSep1 (rule) {
 
 function sep1 (rule, separator) {
   return seq(rule, repeat(seq(separator, rule)))
+}
+
+function optional_with_placeholder(field_name, rule) {
+  return choice(field(field_name, rule), field(field_name, blank()))
 }

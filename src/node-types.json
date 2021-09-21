@@ -12,7 +12,7 @@
         "named": true
       },
       {
-        "type": "for_statement",
+        "type": "for",
         "named": true
       },
       {
@@ -20,7 +20,7 @@
         "named": true
       },
       {
-        "type": "if_statement",
+        "type": "if",
         "named": true
       },
       {
@@ -379,23 +379,9 @@
     "type": "assignment",
     "named": true,
     "fields": {
-      "left": {
+      "assignment_value": {
         "multiple": false,
         "required": true,
-        "types": [
-          {
-            "type": "pattern",
-            "named": true
-          },
-          {
-            "type": "pattern_list",
-            "named": true
-          }
-        ]
-      },
-      "right": {
-        "multiple": false,
-        "required": false,
         "types": [
           {
             "type": "assignment",
@@ -419,13 +405,47 @@
           }
         ]
       },
-      "type": {
+      "assignment_variable": {
         "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "pattern",
+            "named": true
+          },
+          {
+            "type": "pattern_list",
+            "named": true
+          }
+        ]
+      },
+      "type_optional": {
+        "multiple": true,
         "required": false,
         "types": [
           {
+            "type": ":",
+            "named": false
+          },
+          {
             "type": "type",
             "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "async_modifier",
+    "named": true,
+    "fields": {
+      "modifier": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "async",
+            "named": false
           }
         ]
       }
@@ -461,7 +481,33 @@
     "type": "augmented_assignment",
     "named": true,
     "fields": {
-      "left": {
+      "assignment_value": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "assignment",
+            "named": true
+          },
+          {
+            "type": "augmented_assignment",
+            "named": true
+          },
+          {
+            "type": "expression",
+            "named": true
+          },
+          {
+            "type": "expression_list",
+            "named": true
+          },
+          {
+            "type": "yield",
+            "named": true
+          }
+        ]
+      },
+      "assignment_variable": {
         "multiple": false,
         "required": true,
         "types": [
@@ -530,32 +576,6 @@
           {
             "type": "|=",
             "named": false
-          }
-        ]
-      },
-      "right": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "assignment",
-            "named": true
-          },
-          {
-            "type": "augmented_assignment",
-            "named": true
-          },
-          {
-            "type": "expression",
-            "named": true
-          },
-          {
-            "type": "expression_list",
-            "named": true
-          },
-          {
-            "type": "yield",
-            "named": true
           }
         ]
       }
@@ -661,25 +681,6 @@
     }
   },
   {
-    "type": "block",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "_compound_statement",
-          "named": true
-        },
-        {
-          "type": "_simple_statement",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "boolean_operator",
     "named": true,
     "fields": {
@@ -774,11 +775,29 @@
     "named": true,
     "fields": {
       "body": {
-        "multiple": false,
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "indentation_offset_body": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "block",
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
             "named": true
           }
         ]
@@ -961,12 +980,16 @@
           }
         ]
       },
-      "value": {
-        "multiple": false,
+      "parameter_value_optional": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "expression",
+            "type": "=",
+            "named": false
+          },
+          {
+            "type": "parameter_value",
             "named": true
           }
         ]
@@ -1082,20 +1105,59 @@
   {
     "type": "dotted_name",
     "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": true,
-      "types": [
-        {
-          "type": "identifier",
-          "named": true
-        }
-      ]
+    "fields": {
+      "identifier": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": ".",
+            "named": false
+          },
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
-    "type": "elif_clause",
+    "type": "else_clause",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "indentation_offset_body": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "else_if_clause",
     "named": true,
     "fields": {
       "condition": {
@@ -1109,27 +1171,29 @@
         ]
       },
       "consequence": {
-        "multiple": false,
-        "required": true,
+        "multiple": true,
+        "required": false,
         "types": [
           {
-            "type": "block",
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
             "named": true
           }
         ]
-      }
-    }
-  },
-  {
-    "type": "else_clause",
-    "named": true,
-    "fields": {
-      "body": {
-        "multiple": false,
+      },
+      "indentation_offset_body": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "block",
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
             "named": true
           }
         ]
@@ -1139,15 +1203,26 @@
   {
     "type": "except_clause",
     "named": true,
-    "fields": {},
+    "fields": {
+      "indentation_offset_body": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
-        {
-          "type": "block",
-          "named": true
-        },
         {
           "type": "expression",
           "named": true
@@ -1226,16 +1301,118 @@
   {
     "type": "finally_clause",
     "named": true,
+    "fields": {
+      "indentation_offset_body": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "for",
+    "named": true,
     "fields": {},
     "children": {
       "multiple": false,
       "required": true,
       "types": [
         {
-          "type": "block",
+          "type": "for_each_clause",
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "for_each_clause",
+    "named": true,
+    "fields": {
+      "block_collection": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          },
+          {
+            "type": "expression_list",
+            "named": true
+          }
+        ]
+      },
+      "block_iterator": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "pattern",
+            "named": true
+          },
+          {
+            "type": "pattern_list",
+            "named": true
+          }
+        ]
+      },
+      "body": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "else_clause_optional": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "else_clause",
+            "named": true
+          }
+        ]
+      },
+      "indentation_offset_body": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "modifier_list": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "async_modifier",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -1256,6 +1433,16 @@
           }
         ]
       },
+      "modifier_list": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "async_modifier",
+            "named": true
+          }
+        ]
+      },
       "right": {
         "multiple": true,
         "required": true,
@@ -1266,60 +1453,6 @@
           },
           {
             "type": "expression",
-            "named": true
-          }
-        ]
-      }
-    }
-  },
-  {
-    "type": "for_statement",
-    "named": true,
-    "fields": {
-      "alternative": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "else_clause",
-            "named": true
-          }
-        ]
-      },
-      "body": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "block",
-            "named": true
-          }
-        ]
-      },
-      "left": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "pattern",
-            "named": true
-          },
-          {
-            "type": "pattern_list",
-            "named": true
-          }
-        ]
-      },
-      "right": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          },
-          {
-            "type": "expression_list",
             "named": true
           }
         ]
@@ -1361,11 +1494,39 @@
     "named": true,
     "fields": {
       "body": {
-        "multiple": false,
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "indentation_offset_body": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "block",
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "modifier_list": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "async_modifier",
             "named": true
           }
         ]
@@ -1397,6 +1558,16 @@
           {
             "type": "type",
             "named": true
+          }
+        ]
+      },
+      "return_type_optional": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "->",
+            "named": false
           }
         ]
       }
@@ -1468,6 +1639,42 @@
     }
   },
   {
+    "type": "if",
+    "named": true,
+    "fields": {
+      "else_clause_optional": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "else_clause",
+            "named": true
+          }
+        ]
+      },
+      "else_if_clause_list": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "else_if_clause",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "if_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "if_clause",
     "named": true,
     "fields": {},
@@ -1486,20 +1693,6 @@
     "type": "if_statement",
     "named": true,
     "fields": {
-      "alternative": {
-        "multiple": true,
-        "required": false,
-        "types": [
-          {
-            "type": "elif_clause",
-            "named": true
-          },
-          {
-            "type": "else_clause",
-            "named": true
-          }
-        ]
-      },
       "condition": {
         "multiple": false,
         "required": true,
@@ -1511,11 +1704,29 @@
         ]
       },
       "consequence": {
-        "multiple": false,
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "indentation_offset_body": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "block",
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
             "named": true
           }
         ]
@@ -1585,6 +1796,22 @@
           },
           {
             "type": "dotted_name",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "indentation_offset_body",
+    "named": true,
+    "fields": {
+      "statement_list": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "statement",
             "named": true
           }
         ]
@@ -1792,25 +2019,6 @@
     }
   },
   {
-    "type": "module",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "_compound_statement",
-          "named": true
-        },
-        {
-          "type": "_simple_statement",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "named_expression",
     "named": true,
     "fields": {
@@ -1894,18 +2102,38 @@
     }
   },
   {
-    "type": "parameters",
+    "type": "parameter_value",
     "named": true,
     "fields": {},
     "children": {
-      "multiple": true,
-      "required": false,
+      "multiple": false,
+      "required": true,
       "types": [
         {
-          "type": "parameter",
+          "type": "expression",
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "parameters",
+    "named": true,
+    "fields": {
+      "parameter_list": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": ",",
+            "named": false
+          },
+          {
+            "type": "parameter",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -1998,6 +2226,22 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "program",
+    "named": true,
+    "fields": {
+      "statement_list": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "statement",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -2141,6 +2385,25 @@
     }
   },
   {
+    "type": "statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "_compound_statement",
+          "named": true
+        },
+        {
+          "type": "_simple_statement",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "string",
     "named": true,
     "fields": {},
@@ -2194,11 +2457,39 @@
     "named": true,
     "fields": {
       "body": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "else_clause_optional": {
         "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "else_clause",
+            "named": true
+          }
+        ]
+      },
+      "indentation_offset_body": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "block",
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
             "named": true
           }
         ]
@@ -2208,10 +2499,6 @@
       "multiple": true,
       "required": true,
       "types": [
-        {
-          "type": "else_clause",
-          "named": true
-        },
         {
           "type": "except_clause",
           "named": true
@@ -2294,22 +2581,30 @@
           }
         ]
       },
-      "type": {
-        "multiple": false,
+      "parameter_value_optional": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "type",
+            "type": "=",
+            "named": false
+          },
+          {
+            "type": "parameter_value",
             "named": true
           }
         ]
       },
-      "value": {
-        "multiple": false,
+      "type_optional": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "expression",
+            "type": ":",
+            "named": false
+          },
+          {
+            "type": "type",
             "named": true
           }
         ]
@@ -2320,34 +2615,48 @@
     "type": "typed_parameter",
     "named": true,
     "fields": {
-      "type": {
+      "identifier": {
         "multiple": false,
         "required": true,
         "types": [
+          {
+            "type": "dictionary_splat_pattern",
+            "named": true
+          },
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "list_splat_pattern",
+            "named": true
+          }
+        ]
+      },
+      "parameter_value_optional": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "!!UNMATCHED_OPTIONAL",
+            "named": false
+          }
+        ]
+      },
+      "type_optional": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": ":",
+            "named": false
+          },
           {
             "type": "type",
             "named": true
           }
         ]
       }
-    },
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "dictionary_splat_pattern",
-          "named": true
-        },
-        {
-          "type": "identifier",
-          "named": true
-        },
-        {
-          "type": "list_splat_pattern",
-          "named": true
-        }
-      ]
     }
   },
   {
@@ -2388,22 +2697,16 @@
     "type": "while_statement",
     "named": true,
     "fields": {
-      "alternative": {
-        "multiple": false,
+      "body": {
+        "multiple": true,
         "required": false,
         "types": [
           {
-            "type": "else_clause",
+            "type": "_simple_statement",
             "named": true
-          }
-        ]
-      },
-      "body": {
-        "multiple": false,
-        "required": true,
-        "types": [
+          },
           {
-            "type": "block",
+            "type": "indentation_offset_body",
             "named": true
           }
         ]
@@ -2414,6 +2717,30 @@
         "types": [
           {
             "type": "expression",
+            "named": true
+          }
+        ]
+      },
+      "else_clause_optional": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "else_clause",
+            "named": true
+          }
+        ]
+      },
+      "indentation_offset_body": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
             "named": true
           }
         ]
@@ -2471,11 +2798,39 @@
     "named": true,
     "fields": {
       "body": {
-        "multiple": false,
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "indentation_offset_body": {
+        "multiple": true,
         "required": true,
         "types": [
           {
-            "type": "block",
+            "type": "_simple_statement",
+            "named": true
+          },
+          {
+            "type": "indentation_offset_body",
+            "named": true
+          }
+        ]
+      },
+      "modifier_list": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "async_modifier",
             "named": true
           }
         ]
@@ -2510,6 +2865,10 @@
         }
       ]
     }
+  },
+  {
+    "type": "!!UNMATCHED_OPTIONAL",
+    "named": false
   },
   {
     "type": "!=",
