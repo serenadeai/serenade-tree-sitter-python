@@ -36,6 +36,11 @@ module.exports = grammar({
     [$.tuple, $.tuple_pattern],
     [$.list, $.list_pattern],
     [$.with_item, $._collection_elements],
+
+    // [$.primary_expression, $.concatenated_string],
+    // [$.concatenated_string],
+    // primary_expression`, ``
+
   ],
 
   supertypes: $ => [
@@ -44,21 +49,22 @@ module.exports = grammar({
     $.expression,
     $.primary_expression,
     $.pattern,
-    $.parameter,
+    // $.parameter,
   ],
 
   externals: $ => [
-    $._newline,
-    $._indent,
+    $.newline,
+    $.indent,
     $._dedent,
-    $._string_start,
-    $._string_content,
-    $._string_end,
+    $.string_start,
+    $.string_content,
+    $.string_end,
   ],
 
   inline: $ => [
     $._simple_statement,
     $._compound_statement,
+    $._class_suite,
     $._suite,
     $._expressions,
     $._left_hand_side,
@@ -71,7 +77,7 @@ module.exports = grammar({
     program: $ => optional_with_placeholder('statement_list', repeat($.statement)),
 
     statement: $ => choice(
-      $._simple_statements,
+      $.simple_statements,
       $._compound_statement
     ),
 
@@ -80,33 +86,33 @@ module.exports = grammar({
 
     // Simple statements
 
-    _simple_statements: $ => seq(
+    simple_statements: $ => seq(
       $._simple_statement,
       optional(repeat(seq(
         $._semicolon,
         $._simple_statement
       ))),
       optional($._semicolon),
-      $._newline
+      $.newline
     ),
 
-    _simple_statement: $ => choice(
+    _simple_statement: $ => field('statement', choice(
       $.future_import_statement,
       $.import_statement,
       $.import_from_statement,
       $.print_statement,
       $.assert_statement,
       $.expression_statement,
-      $.return_statement,
+      $.return,
       $.delete_statement,
       $.raise_statement,
-      $.pass_statement,
+      $.placeholder_statement,
       $.break_statement,
       $.continue_statement,
       $.global_statement,
       $.nonlocal_statement,
       $.exec_statement
-    ),
+    )),
 
     import_statement: $ => seq(
       'import',
@@ -198,9 +204,11 @@ module.exports = grammar({
       field('value', $.expression)
     ),
 
-    return_statement: $ => seq(
+    return_value: $ => $._expressions,
+
+    return: $ => seq(
       'return',
-      optional($._expressions)
+      optional_with_placeholder('return_value_optional', $.return_value)
     ),
 
     delete_statement: $ => seq(
@@ -219,7 +227,7 @@ module.exports = grammar({
       optional(seq('from', field('cause', $.expression)))
     ),
 
-    pass_statement: $ => prec.left('pass'),
+    placeholder_statement: $ => prec.left('pass'),
     break_statement: $ => prec.left('break'),
     continue_statement: $ => prec.left('continue'),
 
@@ -228,12 +236,11 @@ module.exports = grammar({
     _compound_statement: $ => choice(
       $.if,
       $.for,
-      $.while_statement,
-      $.try_statement,
-      $.with_statement,
+      $.while,
+      $.try,
+      $.with,
       $.function_definition,
-      $.class_definition,
-      $.decorated_definition
+      $.class_definition
     ),
 
     // if: $ => seq(
@@ -242,18 +249,18 @@ module.exports = grammar({
     //   optional_with_placeholder('else_clause_optional', $.else_clause)
     // ),
     if: $ => seq(
-      $.if_statement, 
+      $.if_clause, 
       optional_with_placeholder('else_if_clause_list', 
         repeat($.else_if_clause)), 
       optional_with_placeholder('else_clause_optional', 
       $.else_clause)
     ),
 
-    if_statement: $ => seq(
+    if_clause: $ => seq(
       'if',
       field('condition', $.expression),
       ':',
-      field('consequence', $._suite),
+      $._suite,
       // repeat(field('alternative', $.else_if_clause)),
       // optional(field('alternative', $.else_clause))
     ),
@@ -262,16 +269,19 @@ module.exports = grammar({
       'elif',
       field('condition', $.expression),
       ':',
-      field('consequence', $._suite)
+      $._suite
     ),
 
     else_clause: $ => seq(
       'else',
       ':',
-      field('body', $._suite)
+      $._suite
     ),
 
-    for: $ => $.for_each_clause,
+    for: $ => seq(
+      $.for_each_clause,
+      optional_with_placeholder('else_clause_optional', $.else_clause)
+    ),
 
     for_each_clause: $ => seq(
       optional_with_placeholder('modifier_list', $.async_modifier),
@@ -280,44 +290,60 @@ module.exports = grammar({
       'in',
       field('block_collection', $._expressions),
       ':',
-      field('body', $._suite),
-      optional_with_placeholder('else_clause_optional', 
-      $.else_clause)
+      $._suite
     ),
 
-    while_statement: $ => seq(
+    while: $ => seq(
+      $.while_clause, 
+      optional_with_placeholder('else_clause_optional', 
+      $.else_clause)
+    ), 
+
+    while_clause: $ => seq(
       'while',
       field('condition', $.expression),
       ':',
-      field('body', $._suite),
-      optional_with_placeholder('else_clause_optional', 
-      $.else_clause)
+      $._suite,
     ),
 
-    try_statement: $ => seq(
-      'try',
-      ':',
-      field('body', $._suite),
+    try: $ => seq(
+      $.try_clause,
       choice(
-        seq(
-          repeat1($.except_clause),
-          optional_with_placeholder('else_clause_optional', 
-            $.else_clause),
-          optional($.finally_clause)
-        ),
-        $.finally_clause
+        $.try_only_finally, 
+        $.try_optional_finally
       )
     ),
 
-    except_clause: $ => seq(
-      'except',
+    try_clause: $ => seq(
+      'try',
+      ':',
+      $._suite,
+    ),
+    
+    try_only_finally: $ => seq(
+      optional_with_placeholder('catch_list', "!!UNMATCHABLE_7a83f927a297"),
+      optional_with_placeholder('else_clause_optional', "!!UNMATCHABLE_d199ba40e22a"),
+      field('finally_clause_optional', $.finally_clause)
+    ), 
+
+    try_optional_finally: $ => seq(
+      field('catch_list', repeat1($.catch)),
+      optional_with_placeholder('else_clause_optional', 
+        $.else_clause),
+      optional_with_placeholder('finally_clause_optional', $.finally_clause)
+    ),
+
+    catch_parameter: $ => seq(
+      $.expression,
       optional(seq(
-        $.expression,
-        optional(seq(
-          choice('as', ','),
-          $.expression
-        ))
-      )),
+        choice('as', ','),
+        $.expression
+      ))
+    ), 
+
+    catch: $ => seq(
+      'except',
+      optional_with_placeholder('catch_parameter_optional', $.catch_parameter),
       ':',
       $._suite
     ),
@@ -328,12 +354,12 @@ module.exports = grammar({
       $._suite
     ),
 
-    with_statement: $ => seq(
+    with: $ => seq(
       optional_with_placeholder('modifier_list', $.async_modifier),
       'with',
-      $.with_clause,
+      field('with_item_list', $.with_clause),
       ':',
-      field('body', $._suite)
+      $._suite
     ),
 
     with_clause: $ => choice(
@@ -343,13 +369,12 @@ module.exports = grammar({
 
     with_item: $ => prec.dynamic(-1, seq(
       field('value', $.expression),
-      optional(seq(
-        'as',
-        field('alias', $.pattern)
-      ))
+      optional_with_placeholder('with_item_alias_optional', 
+      seq('as', alias($.pattern, $.with_item_alias)))
     )),
 
     function_definition: $ => seq(
+      optional_with_placeholder('decorator_list_optional', $.decorator_list),
       optional_with_placeholder('modifier_list', $.async_modifier),
       'def',
       field('name', $.identifier),
@@ -357,11 +382,11 @@ module.exports = grammar({
       optional_with_placeholder('return_type_optional', 
         seq(
           '->',
-          field('return_type', $.type)
+          $.type
         )
       ),
       ':',
-      field('body', $._suite)
+      $._suite
     ),
 
     parameters: $ => seq(
@@ -372,13 +397,17 @@ module.exports = grammar({
 
     lambda_parameters: $ => $._parameters,
 
-    list_splat: $ => seq(
-      '*',
+    list_splat: $ => field('splat', $.list_splat_inner),
+
+    list_splat_inner: $ => seq(
+      field('splat_operator', '*'),
       $.expression,
     ),
 
-    dictionary_splat: $ => seq(
-      '**',
+    dictionary_splat: $ => field('splat', $.dictionary_splat_inner),
+
+    dictionary_splat_inner: $ => seq(
+      field('splat_operator', '**'),
       $.expression
     ),
 
@@ -404,11 +433,29 @@ module.exports = grammar({
     ),
 
     class_definition: $ => seq(
+      optional_with_placeholder('decorator_list_optional', $.decorator_list),
       'class',
       field('name', $.identifier),
-      field('superclasses', optional($.argument_list)),
+      optional_with_placeholder('extends_list_optional', seq(
+      '(',
+      optional($.extends_list),
+      ')'
+      )),
       ':',
-      field('body', $._suite)
+      $._class_suite
+    ),
+
+    extends_list: $ => seq(
+      commaSep1(
+        field('extends_type', choice(
+          $.expression,
+          $.list_splat,
+          $.dictionary_splat,
+          alias($.parenthesized_list_splat, $.parenthesized_expression),
+          $.keyword_argument
+        ))
+      ),
+      optional(','),
     ),
 
     parenthesized_list_splat: $ => prec(PREC.parenthesized_list_splat, seq(
@@ -423,40 +470,53 @@ module.exports = grammar({
     argument_list: $ => seq(
       '(',
       optional(commaSep1(
-        choice(
+        field('argument', choice(
           $.expression,
           $.list_splat,
           $.dictionary_splat,
           alias($.parenthesized_list_splat, $.parenthesized_expression),
           $.keyword_argument
-        )
+        ))
       )),
       optional(','),
       ')'
     ),
 
-    decorated_definition: $ => seq(
-      repeat1($.decorator),
-      field('definition', choice(
-        $.class_definition,
-        $.function_definition
-      ))
-    ),
+    // decorated_definition: $ => seq(
+    //   field('decorator_list', repeat1($.decorator)),
+    //   field('definition', choice(
+    //     $.class_definition,
+    //     $.function_definition
+    //   ))
+    // ),
+
+    decorator_list: $ => repeat1($.decorator), 
 
     decorator: $ => seq(
       '@',
-      $.primary_expression,
-      $._newline
+      field('decorator_value', $.primary_expression),
+      $.newline
     ),
 
-    _suite: $ => field('indentation_offset_body', choice(
-      $._simple_statements,
-      seq($._indent, $.indentation_offset_body),
-      $._newline
-    )),
+    _suite: $ => choice(
+      $.simple_statements,
+      seq($.indent, $.indentation_offset_body),
+      $.newline
+    ),
 
     indentation_offset_body: $ => seq(
       optional_with_placeholder('statement_list', repeat($.statement)),
+      $._dedent
+    ),
+
+    _class_suite: $ => choice(
+      $.simple_statements,
+      seq($.indent, alias($.indentation_offset_body_class, $.indentation_offset_body)),
+      $.newline
+    ),
+
+    indentation_offset_body_class: $ => seq(
+      optional_with_placeholder('class_member_list', repeat(alias($.statement, $.class_member_wrapper))),
       $._dedent
     ),
 
@@ -661,16 +721,16 @@ module.exports = grammar({
 
     lambda: $ => prec(PREC.lambda, seq(
       'lambda',
-      field('parameters', optional($.lambda_parameters)),
+      optional_with_placeholder('parameter_list', $.lambda_parameters),
       ':',
-      field('body', $.expression)
+      field('return_value', $.expression)
     )),
 
     lambda_within_for_in_clause: $ => seq(
       'lambda',
       field('parameters', optional($.lambda_parameters)),
       ':',
-      field('body', $._expression_within_for_in_clause)
+      field('return_value', $._expression_within_for_in_clause)
     ),
 
     assignment: $ => seq(
@@ -753,9 +813,9 @@ module.exports = grammar({
     ellipsis: $ => '...',
 
     call: $ => prec(PREC.call, seq(
-      field('function', $.primary_expression),
-      field('arguments', choice(
-        $.generator_expression,
+      field('function_', $.primary_expression),
+      field('argument_list', choice(
+        alias($.generator_expression, $.argument),
         $.argument_list
       ))
     )),
@@ -803,15 +863,17 @@ module.exports = grammar({
 
     dictionary: $ => seq(
       '{',
-      optional(commaSep1(choice($.pair, $.dictionary_splat))),
-      optional(','),
+      optional_with_placeholder('key_value_pair_list', seq(
+        optional(commaSep1(choice($.key_value_pair, $.dictionary_splat))),
+        optional(','),
+      )),
       '}'
     ),
 
-    pair: $ => seq(
-      field('key', $.expression),
+    key_value_pair: $ => seq(
+      field('key_value_pair_key', $.expression),
       ':',
-      field('value', $.expression)
+      field('key_value_pair_value', $.expression)
     ),
 
     list_comprehension: $ => seq(
@@ -823,7 +885,7 @@ module.exports = grammar({
 
     dictionary_comprehension: $ => seq(
       '{',
-      field('body', $.pair),
+      field('body', $.key_value_pair),
       $._comprehension_clauses,
       '}'
     ),
@@ -837,8 +899,10 @@ module.exports = grammar({
 
     generator_expression: $ => seq(
       '(',
-      field('body', $.expression),
-      $._comprehension_clauses,
+      field('generator', seq(
+        $.expression,
+        $._comprehension_clauses
+      )),
       ')'
     ),
 
@@ -846,7 +910,7 @@ module.exports = grammar({
       $.for_in_clause,
       repeat(choice(
         $.for_in_clause,
-        $.if_clause
+        $.if_clause_comprehension
       ))
     ),
 
@@ -857,9 +921,9 @@ module.exports = grammar({
     )),
 
     _collection_elements: $ => seq(
-      commaSep1(choice(
+      commaSep1(field('list_element', choice(
         $.expression, $.yield, $.list_splat, $.parenthesized_list_splat
-      )),
+      ))),
       optional(',')
     ),
 
@@ -872,7 +936,7 @@ module.exports = grammar({
       optional(',')
     )),
 
-    if_clause: $ => seq(
+    if_clause_comprehension: $ => seq(
       'if',
       $.expression
     ),
@@ -891,9 +955,11 @@ module.exports = grammar({
     ),
 
     string: $ => seq(
-      alias($._string_start, '"'),
-      repeat(choice($.interpolation, $.escape_sequence, $._not_escape_sequence, $._string_content)),
-      alias($._string_end, '"')
+      $.string_start,
+      optional_with_placeholder('string_text', 
+        repeat(choice($.interpolation, $.escape_sequence, $._not_escape_sequence, $.string_content))
+      ),
+      $.string_end
     ),
 
     interpolation: $ => seq(
