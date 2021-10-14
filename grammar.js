@@ -40,7 +40,7 @@ module.exports = grammar({
     // [$.primary_expression, $.concatenated_string],
     // [$.concatenated_string],
     // primary_expression`, ``
-
+    [$.typed_parameter, $.typed_default_parameter],
   ],
 
   supertypes: $ => [
@@ -49,7 +49,6 @@ module.exports = grammar({
     $.expression,
     $.primary_expression,
     $.pattern,
-    // $.parameter,
   ],
 
   externals: $ => [
@@ -374,7 +373,7 @@ module.exports = grammar({
     )),
 
     function_definition: $ => seq(
-      optional_with_placeholder('decorator_list_optional', $.decorator_list),
+      optional_with_placeholder('decorator_list', $.decorator_list),
       optional_with_placeholder('modifier_list', $.async_modifier),
       'def',
       field('name', $.identifier),
@@ -467,18 +466,24 @@ module.exports = grammar({
       ')',
     )),
 
-    argument_list: $ => seq(
+    argument: $ => choice(
+      $.expression,
+      $.list_splat,
+      $.dictionary_splat,
+      alias($.parenthesized_list_splat, $.parenthesized_expression),
+      $.keyword_argument, 
+      field('generator_expression', seq(
+        $.expression,
+        $._comprehension_clauses
+      )) // copied here to nest as argument
+    ),
+
+    argument_list_block: $ => seq(
       '(',
-      optional(commaSep1(
-        field('argument', choice(
-          $.expression,
-          $.list_splat,
-          $.dictionary_splat,
-          alias($.parenthesized_list_splat, $.parenthesized_expression),
-          $.keyword_argument
-        ))
+      field('argument_list', seq(
+        optional(commaSep1($.argument)),
+        optional(',')
       )),
-      optional(','),
       ')'
     ),
 
@@ -549,14 +554,15 @@ module.exports = grammar({
     ),
 
     parameter: $ => choice(
-      $.identifier,
+      $.plain_parameter, 
+      // $.identifier,
       $.typed_parameter,
-      $.default_parameter,
+      // $.default_parameter,
       $.typed_default_parameter,
-      $.list_splat_pattern,
-      $.tuple_pattern,
-      alias('*', $.list_splat_pattern),
-      $.dictionary_splat_pattern
+      // $.list_splat_pattern,
+      // $.tuple_pattern,
+      // alias('*', $.list_splat_pattern),
+      // $.dictionary_splat_pattern
     ),
 
     pattern: $ => choice(
@@ -583,14 +589,25 @@ module.exports = grammar({
 
     parameter_value: $ => $.expression, 
 
-    default_parameter: $ => seq(
-      field('name', $.identifier),
-      field('parameter_value_optional', seq('=', $.parameter_value))
+    plain_parameter: $ => seq(
+      field('identifier', choice(
+        $.identifier, 
+        $.list_splat_pattern, 
+        $.dictionary_splat_pattern, 
+        '*', 
+        $.tuple_pattern
+      )),
+      optional_with_placeholder('type_optional', '!!NOMATCH_PLACEHOLDER_i23hg20h0'),
+      optional_with_placeholder('parameter_value_optional', '!!NOMATCH_PLACEHOLDER_a309h23j')
     ),
+    // default_parameter: $ => seq(
+    //   field('name', $.identifier),
+    //   field('parameter_value_optional', seq('=', $.parameter_value))
+    // ),
 
     typed_default_parameter: $ => prec(PREC.typed_parameter, seq(
       field('name', $.identifier),
-      field('type_optional', seq(
+      optional_with_placeholder('type_optional', seq(
         ':',
         $.type)),
       field('parameter_value_optional', seq('=', $.parameter_value))
@@ -814,10 +831,10 @@ module.exports = grammar({
 
     call: $ => prec(PREC.call, seq(
       field('function_', $.primary_expression),
-      field('argument_list', choice(
-        alias($.generator_expression, $.argument),
-        $.argument_list
-      ))
+      // field('argument_list_block', choice(
+        // alias($.generator_expression, $.argument),
+      $.argument_list_block
+      // ))
     )),
 
     typed_parameter: $ => prec(PREC.typed_parameter, seq(
