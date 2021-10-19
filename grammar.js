@@ -745,7 +745,7 @@ module.exports = grammar({
 
     lambda_within_for_in_clause: $ => seq(
       'lambda',
-      field('parameters', optional($.lambda_parameters)),
+      optional_with_placeholder('parameter_list', $.lambda_parameters),
       ':',
       field('return_value', $._expression_within_for_in_clause)
     ),
@@ -1054,13 +1054,15 @@ module.exports = grammar({
 
     identifier: $ => /[_\p{XID_Start}][_\p{XID_Continue}]*/,
 
+    keywords: $ => choice(
+      'print',
+      'exec',
+      'async',
+      'await',
+    ),
+    
     keyword_identifier: $ => prec(-3, alias(
-      choice(
-        'print',
-        'exec',
-        'async',
-        'await',
-      ),
+      $.keywords,
       $.identifier
     )),
 

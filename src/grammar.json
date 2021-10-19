@@ -3623,20 +3623,24 @@
           "value": "lambda"
         },
         {
-          "type": "FIELD",
-          "name": "parameters",
-          "content": {
-            "type": "CHOICE",
-            "members": [
-              {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "FIELD",
+              "name": "parameter_list",
+              "content": {
                 "type": "SYMBOL",
                 "name": "lambda_parameters"
-              },
-              {
+              }
+            },
+            {
+              "type": "FIELD",
+              "name": "parameter_list",
+              "content": {
                 "type": "BLANK"
               }
-            ]
-          }
+            }
+          ]
         },
         {
           "type": "STRING",
@@ -5338,31 +5342,35 @@
       "type": "PATTERN",
       "value": "[_\\p{XID_Start}][_\\p{XID_Continue}]*"
     },
+    "keywords": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "print"
+        },
+        {
+          "type": "STRING",
+          "value": "exec"
+        },
+        {
+          "type": "STRING",
+          "value": "async"
+        },
+        {
+          "type": "STRING",
+          "value": "await"
+        }
+      ]
+    },
     "keyword_identifier": {
       "type": "PREC",
       "value": -3,
       "content": {
         "type": "ALIAS",
         "content": {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "print"
-            },
-            {
-              "type": "STRING",
-              "value": "exec"
-            },
-            {
-              "type": "STRING",
-              "value": "async"
-            },
-            {
-              "type": "STRING",
-              "value": "await"
-            }
-          ]
+          "type": "SYMBOL",
+          "name": "keywords"
         },
         "named": true,
         "value": "identifier"

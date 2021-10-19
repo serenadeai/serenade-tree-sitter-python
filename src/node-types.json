@@ -1701,6 +1701,11 @@
     }
   },
   {
+    "type": "identifier",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "if",
     "named": true,
     "fields": {
@@ -1964,16 +1969,6 @@
     "named": true,
     "fields": {
       "parameter_list": {
-        "multiple": false,
-        "required": false,
-        "types": [
-          {
-            "type": "lambda_parameters",
-            "named": true
-          }
-        ]
-      },
-      "parameters": {
         "multiple": false,
         "required": false,
         "types": [
@@ -3452,10 +3447,6 @@
   {
     "type": "global",
     "named": false
-  },
-  {
-    "type": "identifier",
-    "named": true
   },
   {
     "type": "if",
