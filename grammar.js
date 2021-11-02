@@ -41,14 +41,15 @@ module.exports = grammar({
     // [$.concatenated_string],
     // primary_expression`, ``
     [$.typed_parameter, $.typed_default_parameter],
+    [$.assignment_value_list], 
   ],
 
   supertypes: $ => [
     $._simple_statement,
     $._compound_statement,
-    $.expression,
-    $.primary_expression,
-    $.pattern,
+    // $.expression,
+    // $.primary_expression,
+    // $.pattern,
   ],
 
   externals: $ => [
@@ -95,7 +96,7 @@ module.exports = grammar({
       $.newline
     ),
 
-    _simple_statement: $ => field('statement', choice(
+    _simple_statement: $ => choice(
       $.future_import_statement,
       $.import_statement,
       $.import_from_statement,
@@ -111,7 +112,7 @@ module.exports = grammar({
       $.global_statement,
       $.nonlocal_statement,
       $.exec_statement
-    )),
+    ),
 
     import_statement: $ => seq(
       'import',
@@ -192,8 +193,7 @@ module.exports = grammar({
     expression_statement: $ => choice(
       $.expression,
       seq(commaSep1($.expression), optional(',')),
-      $.assignment,
-      $.augmented_assignment,
+      $.variable_declaration, 
       $.yield
     ),
 
@@ -472,7 +472,7 @@ module.exports = grammar({
       $.dictionary_splat,
       alias($.parenthesized_list_splat, $.parenthesized_expression),
       $.keyword_argument, 
-      field('generator_expression', seq(
+      field('generator', seq(
         $.expression,
         $._comprehension_clauses
       )) // copied here to nest as argument
@@ -499,14 +499,14 @@ module.exports = grammar({
 
     decorator: $ => seq(
       '@',
-      field('decorator_value', $.primary_expression),
+      field('decorator_expression', $.primary_expression),
       $.newline
     ),
 
     _suite: $ => choice(
-      $.simple_statements,
+      alias($.simple_statements, $.statement),
       seq($.indent, $.indentation_offset_body),
-      $.newline
+      seq(optional_with_placeholder('indentation_offset_body_placeholder', '!!NO_MATCH_afihw02h08'), $.newline)
     ),
 
     indentation_offset_body: $ => seq(
@@ -515,13 +515,13 @@ module.exports = grammar({
     ),
 
     _class_suite: $ => choice(
-      $.simple_statements,
+      alias($.simple_statements, $.statement),
       seq($.indent, alias($.indentation_offset_body_class, $.indentation_offset_body)),
       $.newline
     ),
 
     indentation_offset_body_class: $ => seq(
-      optional_with_placeholder('class_member_list', repeat(alias($.statement, $.class_member_wrapper))),
+      optional_with_placeholder('class_member_list', repeat(alias($.statement, $.member))),
       $._dedent
     ),
 
@@ -565,7 +565,7 @@ module.exports = grammar({
       // $.dictionary_splat_pattern
     ),
 
-    pattern: $ => choice(
+    pattern: $ => field('identifier', choice(
       $.identifier,
       $.keyword_identifier,
       $.subscript,
@@ -573,7 +573,7 @@ module.exports = grammar({
       $.list_splat_pattern,
       $.tuple_pattern,
       $.list_pattern
-    ),
+    )),
 
     tuple_pattern: $ => seq(
       '(',
@@ -664,7 +664,7 @@ module.exports = grammar({
       $.set_comprehension,
       $.tuple,
       $.parenthesized_expression,
-      $.generator_expression,
+      $.generator,
       $.ellipsis
     ),
 
@@ -750,23 +750,44 @@ module.exports = grammar({
       field('return_value', $._expression_within_for_in_clause)
     ),
 
+    variable_declaration: $ => field(
+      'assignment_list', 
+      choice($.assignment, $.augmented_assignment)
+    ),
+
     assignment: $ => seq(
-      field('assignment_variable', $._left_hand_side),
+      $.assignment_variable_list,
       optional_with_placeholder('type_optional', 
         seq(':', $.type)
       ),
       '=', 
-      field('assignment_value', $._right_hand_side)
+      $.assignment_value_list
     ),
 
     augmented_assignment: $ => seq(
-      field('assignment_variable', $._left_hand_side),
+      $.assignment_variable_list,
       field('operator', choice(
         '+=', '-=', '*=', '/=', '@=', '//=', '%=', '**=',
         '>>=', '<<=', '&=', '^=', '|='
       )),
-      field('assignment_value', $._right_hand_side)
+      $.assignment_value_list
     ),
+
+    assignment_variable_list: $ => seq(
+      commaSep1(alias($.pattern, $.assignment_variable)), 
+      optional(',')
+    ),
+
+    assignment_value_list: $ => seq(
+      commaSep1($.assignment_value), 
+      optional(',')
+    ),
+    
+    assignment_value: $ => choice(
+      $.expression, 
+      $.variable_declaration, 
+      $.yield
+    ), 
 
     _left_hand_side: $ => choice(
       $.pattern,
@@ -787,13 +808,12 @@ module.exports = grammar({
       )
     ),
 
-    _right_hand_side: $ => choice(
-      $.expression,
-      $.expression_list,
-      $.assignment,
-      $.augmented_assignment,
-      $.yield
-    ),
+    // _right_hand_side: $ => choice(
+    //   $.expression,
+    //   $.expression_list,
+    //   $.variable_declaration, 
+    //   $.yield
+    // ),
 
     yield: $ => prec.right(seq(
       'yield',
@@ -831,10 +851,7 @@ module.exports = grammar({
 
     call: $ => prec(PREC.call, seq(
       field('function_', $.primary_expression),
-      // field('argument_list_block', choice(
-        // alias($.generator_expression, $.argument),
       $.argument_list_block
-      // ))
     )),
 
     typed_parameter: $ => prec(PREC.typed_parameter, seq(
@@ -914,12 +931,12 @@ module.exports = grammar({
       '}'
     ),
 
-    generator_expression: $ => seq(
+    generator: $ => seq(
       '(',
-      field('generator', seq(
+      seq(
         $.expression,
         $._comprehension_clauses
-      )),
+      ),
       ')'
     ),
 
