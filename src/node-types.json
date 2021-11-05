@@ -733,6 +733,16 @@
           }
         ]
       },
+      "indentation_offset_body_placeholder": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "!!NO_MATCH_afihw02h08",
+            "named": false
+          }
+        ]
+      },
       "name": {
         "multiple": false,
         "required": true,
