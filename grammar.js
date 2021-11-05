@@ -480,7 +480,7 @@ module.exports = grammar({
 
     argument_list_block: $ => seq(
       '(',
-      field('argument_list', seq(
+      optional_with_placeholder('argument_list', seq(
         optional(commaSep1($.argument)),
         optional(',')
       )),
