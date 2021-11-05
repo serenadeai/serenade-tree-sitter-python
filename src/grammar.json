@@ -2289,7 +2289,7 @@
               "members": [
                 {
                   "type": "FIELD",
-                  "name": "indentation_offset_body_placeholder",
+                  "name": "indentation_offset_body_class_placeholder",
                   "content": {
                     "type": "STRING",
                     "value": "!!NO_MATCH_afihw02h08"
@@ -2297,7 +2297,7 @@
                 },
                 {
                   "type": "FIELD",
-                  "name": "indentation_offset_body_placeholder",
+                  "name": "indentation_offset_body_class_placeholder",
                   "content": {
                     "type": "BLANK"
                   }

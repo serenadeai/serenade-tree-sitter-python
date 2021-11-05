@@ -517,7 +517,7 @@ module.exports = grammar({
     _class_suite: $ => choice(
       alias($.simple_statements, $.statement),
       seq($.indent, alias($.indentation_offset_body_class, $.indentation_offset_body)),
-      seq(optional_with_placeholder('indentation_offset_body_placeholder', '!!NO_MATCH_afihw02h08'), $.newline)
+      seq(optional_with_placeholder('indentation_offset_body_class_placeholder', '!!NO_MATCH_afihw02h08'), $.newline)
     ),
 
     indentation_offset_body_class: $ => seq(

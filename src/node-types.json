@@ -733,7 +733,7 @@
           }
         ]
       },
-      "indentation_offset_body_placeholder": {
+      "indentation_offset_body_class_placeholder": {
         "multiple": false,
         "required": false,
         "types": [

@@ -12,7 +12,7 @@
 #define ALIAS_COUNT 3
 #define TOKEN_COUNT 107
 #define EXTERNAL_TOKEN_COUNT 6
-#define FIELD_COUNT 54
+#define FIELD_COUNT 55
 #define MAX_ALIAS_SEQUENCE_LENGTH 10
 #define PRODUCTION_ID_COUNT 157
 
@@ -1866,35 +1866,36 @@ enum {
   field_function_ = 23,
   field_generator = 24,
   field_identifier = 25,
-  field_indentation_offset_body_placeholder = 26,
-  field_key_value_pair_key = 27,
-  field_key_value_pair_list = 28,
-  field_key_value_pair_value = 29,
-  field_left = 30,
-  field_list_element = 31,
-  field_modifier = 32,
-  field_modifier_list = 33,
-  field_module_name = 34,
-  field_name = 35,
-  field_object = 36,
-  field_operator = 37,
-  field_operators = 38,
-  field_parameter_list = 39,
-  field_parameter_value_optional = 40,
-  field_parameters = 41,
-  field_return_type_optional = 42,
-  field_return_value = 43,
-  field_return_value_optional = 44,
-  field_right = 45,
-  field_splat = 46,
-  field_splat_operator = 47,
-  field_statement_list = 48,
-  field_string_text = 49,
-  field_subscript = 50,
-  field_type_optional = 51,
-  field_value = 52,
-  field_with_item_alias_optional = 53,
-  field_with_item_list = 54,
+  field_indentation_offset_body_class_placeholder = 26,
+  field_indentation_offset_body_placeholder = 27,
+  field_key_value_pair_key = 28,
+  field_key_value_pair_list = 29,
+  field_key_value_pair_value = 30,
+  field_left = 31,
+  field_list_element = 32,
+  field_modifier = 33,
+  field_modifier_list = 34,
+  field_module_name = 35,
+  field_name = 36,
+  field_object = 37,
+  field_operator = 38,
+  field_operators = 39,
+  field_parameter_list = 40,
+  field_parameter_value_optional = 41,
+  field_parameters = 42,
+  field_return_type_optional = 43,
+  field_return_value = 44,
+  field_return_value_optional = 45,
+  field_right = 46,
+  field_splat = 47,
+  field_splat_operator = 48,
+  field_statement_list = 49,
+  field_string_text = 50,
+  field_subscript = 51,
+  field_type_optional = 52,
+  field_value = 53,
+  field_with_item_alias_optional = 54,
+  field_with_item_list = 55,
 };
 
 static const char * const ts_field_names[] = {
@@ -1924,6 +1925,7 @@ static const char * const ts_field_names[] = {
   [field_function_] = "function_",
   [field_generator] = "generator",
   [field_identifier] = "identifier",
+  [field_indentation_offset_body_class_placeholder] = "indentation_offset_body_class_placeholder",
   [field_indentation_offset_body_placeholder] = "indentation_offset_body_placeholder",
   [field_key_value_pair_key] = "key_value_pair_key",
   [field_key_value_pair_list] = "key_value_pair_list",
@@ -2301,7 +2303,7 @@ static const TSFieldMapEntry ts_field_map_entries[] = {
     {field_extends_type, 0},
     {field_extends_type, 1, .inherited = true},
   [116] =
-    {field_indentation_offset_body_placeholder, 3},
+    {field_indentation_offset_body_class_placeholder, 3},
     {field_name, 1},
   [118] =
     {field_identifier, 0},
@@ -2384,7 +2386,7 @@ static const TSFieldMapEntry ts_field_map_entries[] = {
     {field_parameters, 3},
   [173] =
     {field_decorator_list_optional, 0},
-    {field_indentation_offset_body_placeholder, 4},
+    {field_indentation_offset_body_class_placeholder, 4},
     {field_name, 2},
   [176] =
     {field_argument_list, 1},
@@ -2410,7 +2412,7 @@ static const TSFieldMapEntry ts_field_map_entries[] = {
   [192] =
     {field_extends_list_optional, 2},
     {field_extends_list_optional, 3},
-    {field_indentation_offset_body_placeholder, 5},
+    {field_indentation_offset_body_class_placeholder, 5},
     {field_name, 1},
   [196] =
     {field_extends_list_optional, 2},
@@ -2456,7 +2458,7 @@ static const TSFieldMapEntry ts_field_map_entries[] = {
     {field_extends_list_optional, 2},
     {field_extends_list_optional, 3},
     {field_extends_list_optional, 4},
-    {field_indentation_offset_body_placeholder, 6},
+    {field_indentation_offset_body_class_placeholder, 6},
     {field_name, 1},
   [233] =
     {field_block_collection, 4},
@@ -2479,7 +2481,7 @@ static const TSFieldMapEntry ts_field_map_entries[] = {
     {field_decorator_list_optional, 0},
     {field_extends_list_optional, 3},
     {field_extends_list_optional, 4},
-    {field_indentation_offset_body_placeholder, 6},
+    {field_indentation_offset_body_class_placeholder, 6},
     {field_name, 2},
   [252] =
     {field_decorator_list_optional, 0},
@@ -2512,7 +2514,7 @@ static const TSFieldMapEntry ts_field_map_entries[] = {
     {field_extends_list_optional, 3},
     {field_extends_list_optional, 4},
     {field_extends_list_optional, 5},
-    {field_indentation_offset_body_placeholder, 7},
+    {field_indentation_offset_body_class_placeholder, 7},
     {field_name, 2},
   [280] =
     {field_decorator_list, 0},
