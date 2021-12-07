@@ -106,7 +106,7 @@ module.exports = grammar({
       $.return,
       $.delete_statement,
       $.raise_statement,
-      $.placeholder_statement,
+      $.placeholder,
       $.break_statement,
       $.continue_statement,
       $.global_statement,
@@ -226,7 +226,7 @@ module.exports = grammar({
       optional(seq('from', field('cause', $.expression)))
     ),
 
-    placeholder_statement: $ => prec.left('pass'),
+    placeholder: $ => prec.left('pass'),
     break_statement: $ => prec.left('break'),
     continue_statement: $ => prec.left('continue'),
 

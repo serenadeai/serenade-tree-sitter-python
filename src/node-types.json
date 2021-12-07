@@ -82,7 +82,7 @@
         "named": true
       },
       {
-        "type": "placeholder_statement",
+        "type": "placeholder",
         "named": true
       },
       {
@@ -2355,7 +2355,7 @@
     }
   },
   {
-    "type": "placeholder_statement",
+    "type": "placeholder",
     "named": true,
     "fields": {}
   },

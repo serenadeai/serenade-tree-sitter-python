@@ -136,7 +136,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "placeholder_statement"
+          "name": "placeholder"
         },
         {
           "type": "SYMBOL",
@@ -749,7 +749,7 @@
         }
       ]
     },
-    "placeholder_statement": {
+    "placeholder": {
       "type": "PREC_LEFT",
       "value": 0,
       "content": {
