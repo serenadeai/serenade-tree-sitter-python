@@ -5649,8 +5649,7 @@
     "_class_suite",
     "_suite",
     "_expressions",
-    "_left_hand_side",
-    "keyword_identifier"
+    "_left_hand_side"
   ],
   "supertypes": [
     "_simple_statement",
