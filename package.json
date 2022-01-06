@@ -16,7 +16,7 @@
     "tree-sitter-cli": "^0.19.3"
   },
   "scripts": {
-    "build": "tree-sitter generate && node-gyp build",
+    "build": "tree-sitter generate", 
     "test": "tree-sitter test && script/parse-examples",
     "test-windows": "tree-sitter test"
   },
@@ -28,5 +28,12 @@
         "py"
       ]
     }
-  ]
+  ],
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "arrowParens": "avoid",
+    "singleQuote": true
+  }
 }
