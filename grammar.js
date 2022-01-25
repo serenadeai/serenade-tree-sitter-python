@@ -98,7 +98,7 @@ module.exports = grammar({
         $.expression_statement,
         $.return,
         $.delete_statement,
-        $.raise_statement,
+        $.throw,
         $.placeholder,
         $.break_statement,
         $.continue_statement,
@@ -188,7 +188,7 @@ module.exports = grammar({
 
     _expressions: $ => choice($.expression, $.expression_list),
 
-    raise_statement: $ =>
+    throw: $ =>
       seq(
         'raise',
         optional($._expressions),
