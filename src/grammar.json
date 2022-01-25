@@ -132,7 +132,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "raise_statement"
+          "name": "throw"
         },
         {
           "type": "SYMBOL",
@@ -703,7 +703,7 @@
         }
       ]
     },
-    "raise_statement": {
+    "throw": {
       "type": "SEQ",
       "members": [
         {
